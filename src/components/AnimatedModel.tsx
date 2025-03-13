@@ -5,14 +5,10 @@ const AnimatedModel = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   
   useEffect(() => {
-    // This is a placeholder for the actual 3D model animation
-    // In a real implementation, you would use Three.js or another 3D library
-    // For now, we'll use a CSS animation as a visual placeholder
-    
     const container = containerRef.current;
     if (!container) return;
     
-    // Animation logic would go here in a real implementation
+    // Animation logic for particles would go here
     
     return () => {
       // Cleanup logic
@@ -20,24 +16,27 @@ const AnimatedModel = () => {
   }, []);
   
   return (
-    <div ref={containerRef} className="absolute inset-0 z-0 overflow-hidden opacity-20">
-      {/* SVG Lion Silhouette placeholder */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full max-w-3xl max-h-3xl">
-        <svg 
-          xmlns="http://www.w3.org/2000/svg" 
-          viewBox="0 0 512 512" 
-          className="w-full h-full text-gold/20 animate-pulse"
-          style={{ filter: 'drop-shadow(0 0 20px rgba(226,179,60,0.3))' }}
-        >
-          <path 
-            fill="currentColor" 
-            d="M464 256h-80v-64c0-35.3 28.7-64 64-64h8c13.3 0 24-10.7 24-24V56c0-13.3-10.7-24-24-24h-8c-88.4 0-160 71.6-160 160v240c0 26.5 21.5 48 48 48h128c26.5 0 48-21.5 48-48V304c0-26.5-21.5-48-48-48zm-288 0H96v-64c0-35.3 28.7-64 64-64h8c13.3 0 24-10.7 24-24V56c0-13.3-10.7-24-24-24h-8C71.6 32 0 103.6 0 192v240c0 26.5 21.5 48 48 48h128c26.5 0 48-21.5 48-48V304c0-26.5-21.5-48-48-48z"
+    <div ref={containerRef} className="absolute inset-0 z-0 overflow-hidden">
+      {/* Lion Image Background */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full flex items-center justify-center">
+        <div className="relative w-full max-w-[800px] max-h-[800px] opacity-30 transform scale-100 md:scale-110 lg:scale-125 transition-all duration-1000">
+          <img 
+            src="/lovable-uploads/31e8774b-2997-4e08-a36e-58f615f407f5.png" 
+            alt="Fierce Golden Lion" 
+            className="w-full h-full object-contain animate-pulse"
+            style={{ 
+              filter: 'drop-shadow(0 0 20px rgba(226,179,60,0.3))',
+              animation: 'pulse 4s infinite alternate'
+            }}
           />
-        </svg>
+          
+          {/* Radial gradient overlay to help blend with background */}
+          <div className="absolute inset-0 bg-gradient-to-r from-dark/80 via-transparent to-dark/80 mix-blend-overlay"></div>
+        </div>
       </div>
       
       {/* Animated particles for ambience */}
-      <div className="absolute top-0 left-0 w-full h-full">
+      <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
         {[...Array(20)].map((_, i) => (
           <div 
             key={i}
