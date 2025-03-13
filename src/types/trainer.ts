@@ -27,6 +27,12 @@ export interface Trainer {
   popularity: number;
 }
 
+export interface CheckoutData {
+  trainer: Trainer;
+  selectedDay: string;
+  selectedTime: string;
+}
+
 export type SortOption = 'price' | 'popularity' | 'rating' | 'experience';
 export type FilterOptions = {
   experience: number;

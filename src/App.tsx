@@ -8,7 +8,9 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Goals from "./pages/Goals";
 import Trainers from "./pages/Trainers";
+import Checkout from "./pages/Checkout";
 import NotFound from "./pages/NotFound";
+import PaymentProvider from "./components/PaymentProvider";
 
 const queryClient = new QueryClient();
 
@@ -22,6 +24,11 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/goals" element={<Goals />} />
           <Route path="/trainers" element={<Trainers />} />
+          <Route path="/checkout" element={
+            <PaymentProvider>
+              <Checkout />
+            </PaymentProvider>
+          } />
           <Route path="/pricing" element={<NotFound />} />
           <Route path="/dashboard" element={<NotFound />} />
           <Route path="/login" element={<NotFound />} />

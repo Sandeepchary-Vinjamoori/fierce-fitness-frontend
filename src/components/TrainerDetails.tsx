@@ -11,9 +11,10 @@ import { useToast } from '@/hooks/use-toast';
 
 interface TrainerDetailsProps {
   trainer: Trainer;
+  onClose?: () => void;
 }
 
-const TrainerDetails = ({ trainer }: TrainerDetailsProps) => {
+const TrainerDetails = ({ trainer, onClose }: TrainerDetailsProps) => {
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [selectedDay, setSelectedDay] = useState<string | null>(null);
   const navigate = useNavigate();
@@ -25,8 +26,19 @@ const TrainerDetails = ({ trainer }: TrainerDetailsProps) => {
       description: `You've selected ${trainer.name} as your trainer.`,
     });
     
-    // In a real app, this would navigate to a checkout page
-    // navigate('/checkout', { state: { trainer, selectedTime, selectedDay } });
+    // Navigate to checkout with trainer data
+    navigate('/checkout', { 
+      state: { 
+        trainer, 
+        selectedTime, 
+        selectedDay 
+      } 
+    });
+    
+    // Close the modal if we're in a modal
+    if (onClose) {
+      onClose();
+    }
   };
   
   return (
