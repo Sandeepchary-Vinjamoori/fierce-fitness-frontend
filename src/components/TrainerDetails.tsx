@@ -1,8 +1,9 @@
-import { useState } from 'react';
+
+import { useState, useEffect } from 'react';
 import { Star, Award, Calendar, CheckCircle, Clock, MessageCircle, ArrowRight, DollarSign } from 'lucide-react';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { Trainer } from '@/types/trainer';
+import { Trainer, PricingOption } from '@/types/trainer';
 import { useNavigate } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
@@ -16,9 +17,53 @@ interface TrainerDetailsProps {
 const TrainerDetails = ({ trainer, onClose }: TrainerDetailsProps) => {
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [selectedDay, setSelectedDay] = useState<string | null>(null);
+  const [selectedPlan, setSelectedPlan] = useState<PricingOption | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user } = useAuth();
+  
+  // Generate pricing options if they don't exist
+  useEffect(() => {
+    if (!trainer.pricingOptions || trainer.pricingOptions.length === 0) {
+      const basePrice = trainer.price;
+      const pricingOptions: PricingOption[] = [
+        {
+          duration: "1 Day (Single Session)",
+          months: 0,
+          price: basePrice,
+          discountPercentage: 0
+        },
+        {
+          duration: "3 Months Plan",
+          months: 3,
+          price: Math.floor(basePrice * 3 * 0.9), // 10% discount
+          discountPercentage: 10
+        },
+        {
+          duration: "6 Months Plan",
+          months: 6,
+          price: Math.floor(basePrice * 6 * 0.85), // 15% discount
+          discountPercentage: 15
+        },
+        {
+          duration: "1 Year Plan",
+          months: 12,
+          price: Math.floor(basePrice * 12 * 0.75), // 25% discount
+          discountPercentage: 25
+        }
+      ];
+      
+      // Update trainer object with pricing options
+      trainer.pricingOptions = pricingOptions;
+    }
+  }, [trainer]);
+  
+  // Format price in Indian Rupees
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat('en-IN', { 
+      maximumFractionDigits: 0 
+    }).format(price);
+  };
   
   const handleSelectTrainer = () => {
     if (!user) {
@@ -44,7 +89,8 @@ const TrainerDetails = ({ trainer, onClose }: TrainerDetailsProps) => {
         state: { 
           trainer, 
           selectedTime, 
-          selectedDay 
+          selectedDay,
+          selectedPlan
         } 
       });
     }
@@ -86,7 +132,9 @@ const TrainerDetails = ({ trainer, onClose }: TrainerDetailsProps) => {
           <div className="flex items-center justify-between mb-4">
             <div>
               <span className="text-white/70 text-sm">Price</span>
-              <p className="text-xl font-bold text-white">${trainer.price}</p>
+              <p className="text-xl font-bold text-white flex items-center">
+                <span className="mr-1">₹</span>{formatPrice(trainer.price)}
+              </p>
               <span className="text-white/60 text-xs">per session</span>
             </div>
             <DollarSign size={24} className="text-gold opacity-60" />
@@ -141,6 +189,9 @@ const TrainerDetails = ({ trainer, onClose }: TrainerDetailsProps) => {
             </TabsTrigger>
             <TabsTrigger value="specialties" className="flex-1 data-[state=active]:bg-dark-100 data-[state=active]:text-gold">
               Specialties
+            </TabsTrigger>
+            <TabsTrigger value="pricing" className="flex-1 data-[state=active]:bg-dark-100 data-[state=active]:text-gold">
+              Pricing
             </TabsTrigger>
           </TabsList>
           
@@ -228,6 +279,56 @@ const TrainerDetails = ({ trainer, onClose }: TrainerDetailsProps) => {
               </div>
             </div>
           </TabsContent>
+          
+          <TabsContent value="pricing" className="mt-0">
+            <div className="glass-panel p-6 mb-6">
+              <h3 className="text-xl font-bold mb-4">Pricing Plans</h3>
+              
+              <div className="space-y-4">
+                {trainer.pricingOptions && trainer.pricingOptions.map((option, idx) => (
+                  <div 
+                    key={idx}
+                    onClick={() => setSelectedPlan(option)}
+                    className={`p-4 rounded-lg border cursor-pointer transition-all ${
+                      selectedPlan?.duration === option.duration
+                        ? 'border-gold bg-gold/10'
+                        : 'border-dark-300 bg-dark-200 hover:border-gold/30'
+                    }`}
+                  >
+                    <div className="flex justify-between items-center mb-2">
+                      <h4 className={`font-bold ${selectedPlan?.duration === option.duration ? 'text-gold' : ''}`}>
+                        {option.duration}
+                      </h4>
+                      {option.discountPercentage > 0 && (
+                        <span className="px-2 py-1 bg-green-900/30 text-green-400 text-xs rounded">
+                          {option.discountPercentage}% OFF
+                        </span>
+                      )}
+                    </div>
+                    
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <p className="text-xl font-bold flex items-center">
+                          <span className="mr-1">₹</span>{formatPrice(option.price)}
+                        </p>
+                        {option.months > 0 ? (
+                          <p className="text-white/60 text-xs">
+                            {option.months} month{option.months > 1 ? 's' : ''} commitment
+                          </p>
+                        ) : (
+                          <p className="text-white/60 text-xs">Single session</p>
+                        )}
+                      </div>
+                      
+                      {selectedPlan?.duration === option.duration && (
+                        <CheckCircle size={20} className="text-gold" />
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </TabsContent>
         </Tabs>
         
         <div className="mt-6 glass-panel p-6">
@@ -239,15 +340,15 @@ const TrainerDetails = ({ trainer, onClose }: TrainerDetailsProps) => {
           <Button 
             onClick={handleSelectTrainer}
             className="w-full bg-gold hover:bg-gold-light text-dark font-bold py-3"
-            disabled={!selectedDay || !selectedTime}
+            disabled={!selectedDay || !selectedTime || !selectedPlan}
           >
             {user ? 'Book Now' : 'Sign In to Book'}
             <ArrowRight size={18} className="ml-2" />
           </Button>
           
-          {(!selectedDay || !selectedTime) && (
+          {(!selectedDay || !selectedTime || !selectedPlan) && (
             <p className="text-center text-white/60 text-sm mt-2">
-              Please select a day and time to continue
+              Please select a day, time and plan to continue
             </p>
           )}
         </div>

@@ -1,13 +1,13 @@
 
+// We're only updating a small portion of this file to change the price format
 import { useState } from 'react';
 import { Star, CheckCircle, Calendar, ArrowUpRight } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { Trainer } from '@/types/trainer';
+import { Trainer, PricingOption } from '@/types/trainer';
 import TrainerDetails from './TrainerDetails';
 
-// Mock data for trainers
+// Mock data for trainers - convert prices to INR (₹)
 const mockTrainers: Trainer[] = [
   {
     id: '1',
@@ -17,7 +17,8 @@ const mockTrainers: Trainer[] = [
     experience: 8,
     rating: 4.9,
     reviews: 120,
-    price: 75,
+    price: 3500, // ₹3,500 per session
+    pricingOptions: [], // Will be generated dynamically
     bio: 'Former collegiate athlete with 8+ years of experience transforming bodies and minds. Specializes in strength training, muscle building, and athletic performance enhancement.',
     certifications: [
       { name: 'NSCA Certified Strength & Conditioning Specialist', organization: 'NSCA', year: 2017 },
@@ -40,7 +41,8 @@ const mockTrainers: Trainer[] = [
     experience: 6,
     rating: 4.8,
     reviews: 98,
-    price: 65,
+    price: 2999, // ₹2,999 per session
+    pricingOptions: [], // Will be generated dynamically
     bio: 'Passionate about helping clients achieve sustainable weight loss through smart nutrition and effective training strategies. Holistic approach focusing on lifestyle changes.',
     certifications: [
       { name: 'ACE Certified Personal Trainer', organization: 'ACE', year: 2018 },
@@ -63,7 +65,8 @@ const mockTrainers: Trainer[] = [
     experience: 10,
     rating: 5.0,
     reviews: 156,
-    price: 90,
+    price: 4999, // ₹4,999 per session
+    pricingOptions: [], // Will be generated dynamically
     bio: 'Competition bodybuilder with a decade of experience transforming physiques. Specializes in hypertrophy training and competition prep.',
     certifications: [
       { name: 'ISSA Master Trainer', organization: 'ISSA', year: 2015 },
@@ -86,7 +89,8 @@ const mockTrainers: Trainer[] = [
     experience: 7,
     rating: 4.7,
     reviews: 110,
-    price: 70,
+    price: 3299, // ₹3,299 per session
+    pricingOptions: [], // Will be generated dynamically
     bio: 'Former physical therapist turned fitness coach specializing in mobility, flexibility, and injury prevention. Holistic approach to movement and recovery.',
     certifications: [
       { name: 'NASM Corrective Exercise Specialist', organization: 'NASM', year: 2016 },
@@ -109,7 +113,8 @@ const mockTrainers: Trainer[] = [
     experience: 12,
     rating: 4.9,
     reviews: 135,
-    price: 85,
+    price: 4499, // ₹4,499 per session
+    pricingOptions: [], // Will be generated dynamically
     bio: 'Former pro athlete and strength coach with experience training elite performers. Focuses on functional strength, explosiveness, and sport-specific training.',
     certifications: [
       { name: 'CSCS', organization: 'NSCA', year: 2012 },
@@ -132,6 +137,50 @@ interface TrainersListProps {
 
 const TrainersList = ({ selectedGoals }: TrainersListProps) => {
   const [selectedTrainer, setSelectedTrainer] = useState<Trainer | null>(null);
+  
+  // Format price in Indian Rupees
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat('en-IN', { 
+      maximumFractionDigits: 0 
+    }).format(price);
+  };
+  
+  // Generate pricing options for each trainer
+  const generatePricingOptions = (basePrice: number): PricingOption[] => {
+    return [
+      {
+        duration: "1 Day (Single Session)",
+        months: 0,
+        price: basePrice,
+        discountPercentage: 0
+      },
+      {
+        duration: "3 Months Plan",
+        months: 3,
+        price: Math.floor(basePrice * 3 * 0.9), // 10% discount
+        discountPercentage: 10
+      },
+      {
+        duration: "6 Months Plan",
+        months: 6,
+        price: Math.floor(basePrice * 6 * 0.85), // 15% discount
+        discountPercentage: 15
+      },
+      {
+        duration: "1 Year Plan",
+        months: 12,
+        price: Math.floor(basePrice * 12 * 0.75), // 25% discount
+        discountPercentage: 25
+      }
+    ];
+  };
+  
+  // Add pricing options to trainers if not present
+  mockTrainers.forEach(trainer => {
+    if (!trainer.pricingOptions || trainer.pricingOptions.length === 0) {
+      trainer.pricingOptions = generatePricingOptions(trainer.price);
+    }
+  });
   
   // Filter trainers based on selected goals
   const filteredTrainers = selectedGoals.length > 0
@@ -199,8 +248,9 @@ const TrainersList = ({ selectedGoals }: TrainersListProps) => {
               </div>
               
               <div className="flex justify-between items-center">
-                <div className="text-white font-bold">
-                  ${trainer.price}<span className="text-white/60 font-normal text-sm">/session</span>
+                <div className="text-white font-bold flex items-center">
+                  <span className="mr-1">₹</span>{formatPrice(trainer.price)}
+                  <span className="text-white/60 font-normal text-sm ml-1">/session</span>
                 </div>
                 <Button 
                   variant="ghost" 

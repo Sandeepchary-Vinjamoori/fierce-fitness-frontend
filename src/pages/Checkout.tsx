@@ -41,6 +41,17 @@ const Checkout = () => {
       return;
     }
     
+    // If no plan selected, redirect to trainer details
+    if (!checkoutData?.selectedPlan) {
+      toast({
+        title: "Missing plan selection",
+        description: "Please select a training plan before proceeding to checkout.",
+        variant: "destructive",
+      });
+      navigate('/trainers');
+      return;
+    }
+    
     setIsPageLoading(false);
   }, [user, checkoutData, navigate, location, authLoading, toast]);
   
@@ -61,7 +72,7 @@ const Checkout = () => {
   }
   
   // At this point, we should have both a user and checkout data
-  const { trainer, selectedDay, selectedTime } = checkoutData;
+  const { trainer, selectedDay, selectedTime, selectedPlan } = checkoutData;
 
   return (
     <div className="min-h-screen bg-dark text-white">
@@ -84,7 +95,8 @@ const Checkout = () => {
                 <BookingSummary 
                   trainer={trainer} 
                   selectedDay={selectedDay} 
-                  selectedTime={selectedTime} 
+                  selectedTime={selectedTime}
+                  selectedPlan={selectedPlan}
                 />
               </div>
               
@@ -93,7 +105,7 @@ const Checkout = () => {
                 <CheckoutForm 
                   userEmail={user?.email}
                   profile={profile}
-                  price={trainer.price}
+                  price={selectedPlan.price}
                   onSubmitStart={handlePaymentStart}
                   onSubmitEnd={handlePaymentEnd}
                 />

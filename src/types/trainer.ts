@@ -10,6 +10,13 @@ export interface Schedule {
   availability: string[];
 }
 
+export interface PricingOption {
+  duration: string;
+  months: number;
+  price: number;
+  discountPercentage: number;
+}
+
 export interface Trainer {
   id: string;
   name: string;
@@ -20,7 +27,8 @@ export interface Trainer {
   reviews: number;
   certifications: Certification[];
   bio: string;
-  price: number;
+  price: number; // Base price in INR
+  pricingOptions: PricingOption[];
   specialties: string[];
   availability: Schedule[];
   isAvailable: boolean;
@@ -31,6 +39,7 @@ export interface CheckoutData {
   trainer: Trainer;
   selectedDay: string;
   selectedTime: string;
+  selectedPlan: PricingOption;
 }
 
 export type SortOption = 'price' | 'popularity' | 'rating' | 'experience';

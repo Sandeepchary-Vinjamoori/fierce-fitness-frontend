@@ -43,6 +43,13 @@ const CheckoutForm = ({
   const stripe = useStripe();
   const elements = useElements();
   
+  // Format price in Indian Rupees
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat('en-IN', { 
+      maximumFractionDigits: 0 
+    }).format(price);
+  };
+  
   // Form setup
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -82,15 +89,16 @@ const CheckoutForm = ({
       // In a real app, this would call your backend API via Supabase
       console.log("Booking information:", {
         user: values,
+        price: price
       });
       
-      // Success - navigate to success page or dashboard
+      // Success - navigate to dashboard
       toast({
         title: "Payment successful!",
         description: "Your training session has been booked.",
       });
       
-      // Navigate to dashboard (or success page)
+      // Navigate to dashboard
       navigate('/dashboard');
     } catch (error) {
       console.error("Error processing payment:", error);
@@ -191,7 +199,7 @@ const CheckoutForm = ({
             className="w-full bg-gold hover:bg-gold-light text-dark font-bold py-3"
             disabled={!stripe}
           >
-            {`Complete Booking ($${price})`}
+            {`Complete Booking (₹${formatPrice(price)})`}
           </Button>
         </form>
       </Form>
