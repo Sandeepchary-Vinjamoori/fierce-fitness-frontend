@@ -29,34 +29,54 @@ const formSchema = z.object({
 
 const Checkout = () => {
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isPageLoading, setIsPageLoading] = useState(true);
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
   const stripe = useStripe();
   const elements = useElements();
-  const { user, profile } = useAuth();
+  const { user, profile, isLoading: authLoading } = useAuth();
   
-  // Get trainer data from location state
+  // Get trainer data from location state or redirect
   const checkoutData = location.state as CheckoutData;
   
-  // If no user, redirect to auth page
   useEffect(() => {
+    // Wait for auth to load
+    if (authLoading) return;
+    
+    // If no user, redirect to auth page
     if (!user) {
       navigate('/auth', { state: { from: location } });
+      return;
     }
-  }, [user, navigate, location]);
-  
-  // If no trainer data, redirect to trainers page
-  useEffect(() => {
+    
+    // If no checkout data, redirect to trainers page
     if (!checkoutData?.trainer) {
+      toast({
+        title: "Missing selection",
+        description: "Please select a trainer before proceeding to checkout.",
+        variant: "destructive",
+      });
       navigate('/trainers');
+      return;
     }
-  }, [checkoutData, navigate]);
+    
+    setIsPageLoading(false);
+  }, [user, checkoutData, navigate, location, authLoading, toast]);
   
-  if (!checkoutData?.trainer || !user) {
-    return null; // Will be redirected by useEffect
+  // If still loading or no data, show loading animation
+  if (isPageLoading || authLoading) {
+    return (
+      <div className="min-h-screen bg-dark text-white">
+        <Navbar />
+        <div className="flex items-center justify-center min-h-[80vh]">
+          <LoadingAnimation />
+        </div>
+      </div>
+    );
   }
   
+  // At this point, we should have both a user and checkout data
   const { trainer, selectedDay, selectedTime } = checkoutData;
   
   // Form setup
@@ -128,7 +148,9 @@ const Checkout = () => {
       <Navbar />
       
       {isProcessing ? (
-        <LoadingAnimation />
+        <div className="flex items-center justify-center min-h-[80vh]">
+          <LoadingAnimation />
+        </div>
       ) : (
         <main className="container mx-auto px-4 py-12">
           <div className="max-w-3xl mx-auto">
