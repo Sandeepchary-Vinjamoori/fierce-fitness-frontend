@@ -7,7 +7,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Calendar, User, DollarSign, Timer, ArrowUpRight } from 'lucide-react';
+import { Calendar, User, Timer, ArrowUpRight } from 'lucide-react';
 
 // Mock data for bookings - in a real app, this would come from your database
 const mockBookings = [
@@ -19,7 +19,6 @@ const mockBookings = [
     plan: "3 Months Plan",
     startDate: "2023-11-15",
     endDate: "2024-02-15",
-    price: 4050,
     nextSession: "Monday, 10:00 AM",
     canUpgrade: true
   },
@@ -31,7 +30,6 @@ const mockBookings = [
     plan: "1 Day (Single Session)",
     startDate: "2023-11-20",
     endDate: "2023-11-20",
-    price: 3500,
     nextSession: "Wednesday, 2:00 PM",
     canUpgrade: true
   }
@@ -61,13 +59,6 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user, isLoading: authLoading } = useAuth();
-
-  // Format price in Indian Rupees
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('en-IN', { 
-      maximumFractionDigits: 0 
-    }).format(price);
-  };
 
   useEffect(() => {
     // Wait for auth to load
@@ -129,13 +120,13 @@ const Dashboard = () => {
 
           {bookings.length === 0 ? (
             <div className="glass-panel p-8 text-center">
-              <h3 className="text-xl font-bold mb-4">No bookings yet</h3>
-              <p className="text-white/70 mb-6">You haven't booked any training sessions yet.</p>
+              <h3 className="text-xl font-bold mb-4">No active plans</h3>
+              <p className="text-white/70 mb-6">Select a trainer to start training</p>
               <Button 
-                onClick={() => navigate('/trainers')}
+                onClick={() => navigate('/goals')}
                 className="bg-gold hover:bg-gold-light text-dark font-bold"
               >
-                Find a Trainer
+                Choose Your Goal
                 <ArrowUpRight size={16} className="ml-2" />
               </Button>
             </div>
@@ -174,11 +165,8 @@ const Dashboard = () => {
                             <div className="flex items-start">
                               <Calendar size={18} className="text-gold mt-1 mr-2" />
                               <div>
-                                <p className="text-white/70 text-sm">Duration</p>
+                                <p className="text-white/70 text-sm">Plan Duration</p>
                                 <p className="font-medium">{booking.plan}</p>
-                                <p className="text-xs text-white/60">
-                                  {new Date(booking.startDate).toLocaleDateString()} - {new Date(booking.endDate).toLocaleDateString()}
-                                </p>
                               </div>
                             </div>
                             
@@ -187,14 +175,6 @@ const Dashboard = () => {
                               <div>
                                 <p className="text-white/70 text-sm">Next Session</p>
                                 <p className="font-medium">{booking.nextSession}</p>
-                              </div>
-                            </div>
-                            
-                            <div className="flex items-start">
-                              <DollarSign size={18} className="text-gold mt-1 mr-2" />
-                              <div>
-                                <p className="text-white/70 text-sm">Price Paid</p>
-                                <p className="font-medium">₹{formatPrice(booking.price)}</p>
                               </div>
                             </div>
                             
@@ -242,10 +222,6 @@ const Dashboard = () => {
                                   <div className="flex justify-between items-center mb-1">
                                     <p className="font-medium">{option.duration}</p>
                                     <p className="text-green-400 text-sm">{option.savingsPercentage}% off</p>
-                                  </div>
-                                  <div className="flex justify-between items-center mb-2">
-                                    <p className="text-white/70 text-sm">Price difference</p>
-                                    <p className="font-medium">₹{formatPrice(option.price)}</p>
                                   </div>
                                   <Button 
                                     onClick={() => handleUpgrade(booking.id, option.duration)}

@@ -1,7 +1,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Menu, X, User, LogOut, Settings } from 'lucide-react';
+import { Menu, X, LogOut } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useClickAway } from '@/hooks/useClickAway';
 
@@ -36,7 +36,7 @@ const Navbar = () => {
   // Get the user's initials for the avatar
   const getInitials = () => {
     if (!profile?.full_name) return 'U';
-    return profile.full_name.split(' ').map(n => n[0]).join('').toUpperCase();
+    return profile.full_name.split(' ')[0][0].toUpperCase();
   };
 
   return (
@@ -87,17 +87,6 @@ const Navbar = () => {
                     </div>
                     
                     <div className="border-t border-dark-300 mt-2 pt-2">
-                      <button 
-                        onClick={() => {
-                          setProfileMenuOpen(false);
-                          navigate('/dashboard');
-                        }}
-                        className="px-4 py-2 text-sm text-white hover:bg-dark-200 w-full text-left flex items-center"
-                      >
-                        <Settings size={16} className="mr-2" />
-                        Account Settings
-                      </button>
-                      
                       <button 
                         onClick={handleLogout}
                         className="px-4 py-2 text-sm text-white hover:bg-dark-200 w-full text-left flex items-center"

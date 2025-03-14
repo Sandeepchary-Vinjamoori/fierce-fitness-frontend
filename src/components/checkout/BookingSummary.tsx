@@ -60,7 +60,8 @@ const BookingSummary = ({ trainer, selectedDay, selectedTime, selectedPlan }: Bo
         <div className="flex justify-between text-lg font-bold">
           <span>Total:</span>
           <span className="text-gold flex items-center">
-            <span className="mr-1">₹</span>{formatPrice(selectedPlan.price)}
+            <IndianRupee size={18} className="mr-1" />
+            {formatPrice(selectedPlan.price)}
           </span>
         </div>
       </div>
