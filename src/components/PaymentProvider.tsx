@@ -11,7 +11,7 @@ interface PaymentProviderProps {
   children: ReactNode;
 }
 
-const PaymentProvider = ({ children }: PaymentProviderProps) => {
+export const PaymentProvider = ({ children }: PaymentProviderProps) => {
   return (
     <Elements stripe={stripePromise}>
       {children}

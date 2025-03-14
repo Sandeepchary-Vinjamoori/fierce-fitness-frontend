@@ -1,6 +1,6 @@
 
 import { Trainer, PricingOption } from "@/types/trainer";
-import { Indian_Rupee } from "lucide-react";
+import { IndianRupee } from "lucide-react";
 
 type BookingSummaryProps = {
   trainer: Trainer;
