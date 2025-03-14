@@ -2,8 +2,11 @@
 import { Link } from 'react-router-dom';
 import AnimatedModel from './AnimatedModel';
 import { ChevronRight } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 
 const Hero = () => {
+  const { user } = useAuth();
+  
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20">
       {/* Background elements */}
@@ -47,18 +50,18 @@ const Hero = () => {
             style={{ animationDelay: '0.8s' }}
           >
             <Link 
-              to="/goals" 
+              to={user ? "/trainers" : "/goals"} 
               className="btn-primary flex items-center justify-center gap-2 group"
             >
-              Get Started
+              {user ? "Book a Trainer" : "Get Started"}
               <ChevronRight className="transition-transform group-hover:translate-x-1" size={20} />
             </Link>
             <Link 
-              to="/trainers" 
+              to={user ? "/dashboard" : "/auth"} 
               className="text-white border border-white/20 hover:border-white/40 font-bold py-4 px-8 rounded-md 
               transition-all duration-300 backdrop-blur-sm hover:bg-white/5"
             >
-              Meet Our Trainers
+              {user ? "My Dashboard" : "Sign Up"}
             </Link>
           </div>
           

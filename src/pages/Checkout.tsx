@@ -1,7 +1,7 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Trainer, CheckoutData } from '@/types/trainer';
+import { CheckoutData } from '@/types/trainer';
 import Navbar from '@/components/Navbar';
 import { z } from "zod";
 import { CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
@@ -12,8 +12,9 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import LoadingAnimation from '@/components/LoadingAnimation';
+import { useAuth } from '@/contexts/AuthContext';
 
-// Form validation schema
+// Form validation schema for checkout
 const formSchema = z.object({
   name: z.string().min(2, {
     message: "Name must be at least 2 characters.",
@@ -21,8 +22,8 @@ const formSchema = z.object({
   email: z.string().email({
     message: "Please enter a valid email address.",
   }),
-  password: z.string().min(8, {
-    message: "Password must be at least 8 characters.",
+  phoneNumber: z.string().min(10, {
+    message: "Please enter a valid phone number.",
   }),
 });
 
@@ -33,14 +34,27 @@ const Checkout = () => {
   const { toast } = useToast();
   const stripe = useStripe();
   const elements = useElements();
+  const { user, profile } = useAuth();
   
   // Get trainer data from location state
   const checkoutData = location.state as CheckoutData;
   
+  // If no user, redirect to auth page
+  useEffect(() => {
+    if (!user) {
+      navigate('/auth', { state: { from: location } });
+    }
+  }, [user, navigate, location]);
+  
   // If no trainer data, redirect to trainers page
-  if (!checkoutData?.trainer) {
-    navigate('/trainers');
-    return null;
+  useEffect(() => {
+    if (!checkoutData?.trainer) {
+      navigate('/trainers');
+    }
+  }, [checkoutData, navigate]);
+  
+  if (!checkoutData?.trainer || !user) {
+    return null; // Will be redirected by useEffect
   }
   
   const { trainer, selectedDay, selectedTime } = checkoutData;
@@ -49,9 +63,9 @@ const Checkout = () => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: "",
-      email: "",
-      password: "",
+      name: profile?.full_name || "",
+      email: user?.email || "",
+      phoneNumber: profile?.phone_number || "",
     },
   });
 
@@ -69,11 +83,7 @@ const Checkout = () => {
     setIsProcessing(true);
     
     try {
-      // 1. Create the user account
-      // In a real app, this would call your backend API
-      console.log("Creating user account:", values);
-      
-      // 2. Process payment
+      // Process payment
       const cardElement = elements.getElement(CardElement);
       
       if (!cardElement) {
@@ -84,8 +94,8 @@ const Checkout = () => {
       // This is just a simulation for demonstration purposes
       await new Promise(resolve => setTimeout(resolve, 2000));
       
-      // 3. Save booking information
-      // In a real app, this would call your backend API
+      // Save booking information
+      // In a real app, this would call your backend API via Supabase
       console.log("Booking information:", {
         trainer,
         selectedDay,
@@ -93,14 +103,11 @@ const Checkout = () => {
         user: values,
       });
       
-      // 4. Success - navigate to success page or dashboard
+      // Success - navigate to success page or dashboard
       toast({
         title: "Payment successful!",
         description: "Your training session has been booked.",
       });
-      
-      // Simulate sending confirmation email
-      console.log(`Sending confirmation email to ${values.email}`);
       
       // Navigate to dashboard (or success page)
       navigate('/dashboard');
@@ -166,17 +173,13 @@ const Checkout = () => {
                       <span className="text-gold">${trainer.price}</span>
                     </div>
                   </div>
-                  
-                  <p className="text-white/60 text-xs text-center">
-                    This booking will create your account and give you access to your personalized dashboard.
-                  </p>
                 </div>
               </div>
               
               {/* Checkout Form */}
               <div className="md:col-span-3">
                 <div className="glass-panel p-6">
-                  <h2 className="text-xl font-bold mb-6">Your Information</h2>
+                  <h2 className="text-xl font-bold mb-6">Contact Information</h2>
                   
                   <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -210,6 +213,7 @@ const Checkout = () => {
                                 type="email" 
                                 {...field}
                                 className="bg-dark-200 border-dark-300 text-white"
+                                disabled
                               />
                             </FormControl>
                             <FormMessage />
@@ -219,14 +223,13 @@ const Checkout = () => {
                       
                       <FormField
                         control={form.control}
-                        name="password"
+                        name="phoneNumber"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Password</FormLabel>
+                            <FormLabel>Phone Number</FormLabel>
                             <FormControl>
                               <Input 
-                                placeholder="Create a password" 
-                                type="password" 
+                                placeholder="Enter your phone number" 
                                 {...field}
                                 className="bg-dark-200 border-dark-300 text-white"
                               />
@@ -259,14 +262,10 @@ const Checkout = () => {
                       <Button 
                         type="submit" 
                         className="w-full bg-gold hover:bg-gold-light text-dark font-bold py-3"
-                        disabled={!stripe}
+                        disabled={!stripe || isProcessing}
                       >
-                        Complete Booking (${trainer.price})
+                        {isProcessing ? "Processing..." : `Complete Booking ($${trainer.price})`}
                       </Button>
-                      
-                      <p className="text-white/60 text-xs text-center">
-                        By completing this booking, you agree to our Terms of Service and Privacy Policy.
-                      </p>
                     </form>
                   </Form>
                 </div>

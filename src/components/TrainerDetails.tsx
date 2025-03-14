@@ -1,13 +1,12 @@
-
 import { useState } from 'react';
 import { Star, Award, Calendar, CheckCircle, Clock, MessageCircle, ArrowRight, DollarSign } from 'lucide-react';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Trainer } from '@/types/trainer';
 import { useNavigate } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface TrainerDetailsProps {
   trainer: Trainer;
@@ -19,23 +18,37 @@ const TrainerDetails = ({ trainer, onClose }: TrainerDetailsProps) => {
   const [selectedDay, setSelectedDay] = useState<string | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user } = useAuth();
   
   const handleSelectTrainer = () => {
-    toast({
-      title: "Trainer Selected",
-      description: `You've selected ${trainer.name} as your trainer.`,
-    });
+    if (!user) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to book a training session.",
+      });
+      
+      navigate('/auth', { 
+        state: { 
+          from: { 
+            pathname: '/trainers',
+          } 
+        } 
+      });
+    } else {
+      toast({
+        title: "Trainer Selected",
+        description: `You've selected ${trainer.name} as your trainer.`,
+      });
+      
+      navigate('/checkout', { 
+        state: { 
+          trainer, 
+          selectedTime, 
+          selectedDay 
+        } 
+      });
+    }
     
-    // Navigate to checkout with trainer data
-    navigate('/checkout', { 
-      state: { 
-        trainer, 
-        selectedTime, 
-        selectedDay 
-      } 
-    });
-    
-    // Close the modal if we're in a modal
     if (onClose) {
       onClose();
     }
@@ -220,7 +233,7 @@ const TrainerDetails = ({ trainer, onClose }: TrainerDetailsProps) => {
         <div className="mt-6 glass-panel p-6">
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-xl font-bold">Ready to start?</h3>
-            <p className="text-white/70">No sign-up required</p>
+            <p className="text-white/70">{user ? user.email : 'Login required'}</p>
           </div>
           
           <Button 
@@ -228,7 +241,7 @@ const TrainerDetails = ({ trainer, onClose }: TrainerDetailsProps) => {
             className="w-full bg-gold hover:bg-gold-light text-dark font-bold py-3"
             disabled={!selectedDay || !selectedTime}
           >
-            Select Trainer
+            {user ? 'Book Now' : 'Sign In to Book'}
             <ArrowRight size={18} className="ml-2" />
           </Button>
           
