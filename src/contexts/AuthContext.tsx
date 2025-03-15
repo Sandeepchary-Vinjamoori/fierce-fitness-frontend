@@ -40,6 +40,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     // Set up the auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (_event, currentSession) => {
+        console.log('Auth state changed:', _event, currentSession?.user?.id);
         setSession(currentSession);
         setUser(currentSession?.user || null);
         
@@ -47,23 +48,30 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           await fetchProfile(currentSession.user.id);
         } else {
           setProfile(null);
+          setIsLoading(false);
         }
-        
-        setIsLoading(false);
       }
     );
 
     // Get the initial session
     const initializeAuth = async () => {
-      const { data: { session: initialSession } } = await supabase.auth.getSession();
-      setSession(initialSession);
-      setUser(initialSession?.user || null);
+      try {
+        console.log('Initializing auth...');
+        const { data: { session: initialSession } } = await supabase.auth.getSession();
+        console.log('Initial session:', initialSession?.user?.id);
+        
+        setSession(initialSession);
+        setUser(initialSession?.user || null);
 
-      if (initialSession?.user) {
-        await fetchProfile(initialSession.user.id);
+        if (initialSession?.user) {
+          await fetchProfile(initialSession.user.id);
+        } else {
+          setIsLoading(false);
+        }
+      } catch (error) {
+        console.error('Error initializing auth:', error);
+        setIsLoading(false);
       }
-      
-      setIsLoading(false);
     };
 
     initializeAuth();
@@ -76,6 +84,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const fetchProfile = async (userId: string) => {
     try {
+      console.log('Fetching profile for user:', userId);
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
@@ -84,17 +93,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       if (error) {
         console.error('Error fetching profile:', error);
+        setIsLoading(false);
         return;
       }
 
+      console.log('Profile data:', data);
       setProfile(data);
+      setIsLoading(false);
     } catch (error) {
       console.error('Error fetching profile:', error);
+      setIsLoading(false);
     }
   };
 
   const refreshProfile = async () => {
     if (user) {
+      setIsLoading(true);
       await fetchProfile(user.id);
     }
   };
@@ -139,6 +153,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const signIn = async (email: string, password: string) => {
     try {
+      setIsLoading(true);
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -150,6 +165,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           description: error.message,
           variant: "destructive",
         });
+        setIsLoading(false);
         return { error, data: null };
       }
 
@@ -165,23 +181,42 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         description: error.message,
         variant: "destructive",
       });
+      setIsLoading(false);
       return { error, data: null };
     }
   };
 
   const signOut = async () => {
     try {
-      await supabase.auth.signOut();
-      toast({
-        title: "Logged out",
-        description: "You have been logged out successfully.",
-      });
+      setIsLoading(true);
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) {
+        console.error('Error signing out:', error);
+        toast({
+          title: "Error logging out",
+          description: error.message,
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Logged out",
+          description: "You have been logged out successfully.",
+        });
+        // Clear user state immediately
+        setUser(null);
+        setSession(null);
+        setProfile(null);
+      }
     } catch (error: any) {
+      console.error('Error in signOut function:', error);
       toast({
         title: "Error logging out",
         description: error.message,
         variant: "destructive",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 

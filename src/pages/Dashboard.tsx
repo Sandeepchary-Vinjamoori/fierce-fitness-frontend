@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Calendar, User, Timer, ArrowUpRight } from 'lucide-react';
+import { Skeleton } from "@/components/ui/skeleton";
 
 // Mock data for bookings - in a real app, this would come from your database
 const mockBookings = [
@@ -58,22 +59,39 @@ const Dashboard = () => {
   const [selectedBooking, setSelectedBooking] = useState<string | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { user, isLoading: authLoading } = useAuth();
+  const { user, profile, isLoading: authLoading } = useAuth();
+
+  console.log("Dashboard render - Auth status:", { user: !!user, authLoading, profileLoaded: !!profile });
 
   useEffect(() => {
     // Wait for auth to load
-    if (authLoading) return;
+    if (authLoading) {
+      console.log("Dashboard: Auth is still loading");
+      return;
+    }
+
+    console.log("Dashboard: Auth loaded, user:", !!user);
 
     // If no user, redirect to auth page
     if (!user) {
+      console.log("Dashboard: No user, redirecting to auth");
       navigate('/auth', { state: { from: { pathname: '/dashboard' } } });
       return;
     }
 
     // In a real app, fetch bookings from database
     // For now, use mock data
-    setBookings(mockBookings);
-    setIsLoading(false);
+    const fetchBookings = () => {
+      console.log("Dashboard: Fetching bookings");
+      // Simulate API call with timeout
+      setTimeout(() => {
+        setBookings(mockBookings);
+        setIsLoading(false);
+        console.log("Dashboard: Bookings loaded");
+      }, 1000);
+    };
+
+    fetchBookings();
   }, [user, authLoading, navigate]);
 
   const handleUpgrade = (bookingId: string, plan: string) => {
@@ -96,14 +114,66 @@ const Dashboard = () => {
     }, 1500);
   };
 
-  // If still loading, show loading animation
-  if (isLoading || authLoading) {
+  // Loading skeletons for better UX during loading
+  const LoadingSkeleton = () => (
+    <div className="space-y-6">
+      {[1, 2].map((i) => (
+        <div key={i} className="glass-panel overflow-hidden">
+          <div className="p-6">
+            <div className="flex items-center mb-4">
+              <Skeleton className="w-16 h-16 rounded-full mr-4" />
+              <div>
+                <Skeleton className="h-5 w-40 mb-2" />
+                <Skeleton className="h-4 w-32" />
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+              {[1, 2, 3].map((j) => (
+                <div key={j} className="flex items-start">
+                  <Skeleton className="w-5 h-5 mt-1 mr-2" />
+                  <div>
+                    <Skeleton className="h-3 w-24 mb-1" />
+                    <Skeleton className="h-4 w-32" />
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="flex gap-2">
+              <Skeleton className="h-9 w-32" />
+              <Skeleton className="h-9 w-32" />
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+
+  // If still loading auth, show simple message
+  if (authLoading) {
     return (
       <div className="min-h-screen bg-dark text-white">
         <Navbar />
-        <div className="flex items-center justify-center min-h-[80vh]">
+        <div className="flex flex-col items-center justify-center min-h-[80vh]">
           <LoadingAnimation />
+          <p className="mt-4 text-white/70">Fetching your details...</p>
         </div>
+      </div>
+    );
+  }
+
+  // If user data is loaded but bookings are still loading
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-dark text-white">
+        <Navbar />
+        <main className="container mx-auto px-4 py-12">
+          <div className="max-w-4xl mx-auto">
+            <h1 className="section-heading mb-6">
+              Your <span className="text-gold">Dashboard</span>
+            </h1>
+            <LoadingSkeleton />
+          </div>
+        </main>
       </div>
     );
   }

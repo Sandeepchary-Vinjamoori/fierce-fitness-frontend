@@ -28,15 +28,24 @@ const Navbar = () => {
   }, []);
 
   const handleLogout = async () => {
-    await signOut();
-    setProfileMenuOpen(false);
-    navigate('/');
+    try {
+      await signOut();
+      setProfileMenuOpen(false);
+      setMobileMenuOpen(false);
+      navigate('/');
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
   };
 
   // Get the user's initials for the avatar
   const getInitials = () => {
-    if (!profile?.full_name) return 'U';
-    return profile.full_name.split(' ')[0][0].toUpperCase();
+    if (!profile?.full_name) return user?.email?.charAt(0).toUpperCase() || 'U';
+    
+    const fullName = profile.full_name.trim();
+    if (!fullName) return user?.email?.charAt(0).toUpperCase() || 'U';
+    
+    return fullName.charAt(0).toUpperCase();
   };
 
   return (
@@ -66,6 +75,7 @@ const Navbar = () => {
                 <button 
                   onClick={() => setProfileMenuOpen(!profileMenuOpen)}
                   className="w-10 h-10 rounded-full bg-gold text-dark flex items-center justify-center font-bold text-lg hover:bg-gold-light transition-colors"
+                  aria-label="Open profile menu"
                 >
                   {getInitials()}
                 </button>
@@ -75,7 +85,7 @@ const Navbar = () => {
                   <div className="absolute right-0 mt-2 w-60 bg-dark-100 border border-dark-300 rounded-md shadow-lg py-2 z-50">
                     <div className="px-4 py-3 border-b border-dark-300">
                       <p className="text-sm text-white/80">Signed in as</p>
-                      <p className="text-sm font-medium truncate">{profile?.full_name || 'User'}</p>
+                      <p className="text-sm font-medium truncate">{profile?.full_name || user.email}</p>
                     </div>
                     
                     <div className="px-4 py-2">
@@ -110,6 +120,7 @@ const Navbar = () => {
           <button 
             className="md:hidden text-white focus:outline-none"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
           >
             {mobileMenuOpen ? (
               <X size={24} className="text-gold" />
@@ -139,15 +150,12 @@ const Navbar = () => {
                     {getInitials()}
                   </div>
                   <div>
-                    <p className="font-medium">{profile?.full_name || 'User'}</p>
+                    <p className="font-medium">{profile?.full_name || user.email}</p>
                     <p className="text-sm text-white/70">{user.email}</p>
                   </div>
                 </div>
                 <button
-                  onClick={() => {
-                    handleLogout();
-                    setMobileMenuOpen(false);
-                  }}
+                  onClick={handleLogout}
                   className="w-full py-2 bg-dark-300 rounded-md text-white flex items-center justify-center space-x-2"
                 >
                   <LogOut size={16} />
