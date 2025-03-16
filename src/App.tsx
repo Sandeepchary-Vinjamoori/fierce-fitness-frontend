@@ -1,4 +1,3 @@
-
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from '@/components/ui/toaster';
 import { PaymentProvider } from '@/components/PaymentProvider';
@@ -12,6 +11,7 @@ import Trainers from '@/pages/Trainers';
 import Checkout from '@/pages/Checkout';
 import Auth from '@/pages/Auth';
 import Dashboard from '@/pages/Dashboard';
+import HealthInfo from '@/pages/HealthInfo';
 
 // Protected route component
 const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
@@ -54,6 +54,7 @@ function App() {
                 </ProtectedRoute>
               } 
             />
+            <Route path="/health-info" element={<HealthInfo />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           <Toaster />

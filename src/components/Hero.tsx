@@ -50,10 +50,10 @@ const Hero = () => {
             style={{ animationDelay: '0.8s' }}
           >
             <Link 
-              to={user ? "/trainers" : "/goals"} 
+              to="/goals" 
               className="btn-primary flex items-center justify-center gap-2 group"
             >
-              {user ? "Book a Trainer" : "Get Started"}
+              Get Started
               <ChevronRight className="transition-transform group-hover:translate-x-1" size={20} />
             </Link>
             <Link 

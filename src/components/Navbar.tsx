@@ -64,8 +64,7 @@ const Navbar = () => {
           <div className="hidden md:flex space-x-8">
             <Link to="/" className="nav-link active">Home</Link>
             <Link to="/goals" className="nav-link">Goal Selection</Link>
-            <Link to="/trainers" className="nav-link">Trainers</Link>
-            <Link to="/pricing" className="nav-link">Pricing</Link>
+            <Link to="/health-info" className="nav-link">My Health Info</Link>
             {user && <Link to="/dashboard" className="nav-link">Dashboard</Link>}
           </div>
           
@@ -138,8 +137,7 @@ const Navbar = () => {
         <div className="container mx-auto px-4 flex flex-col space-y-4">
           <Link to="/" className="nav-link active" onClick={() => setMobileMenuOpen(false)}>Home</Link>
           <Link to="/goals" className="nav-link" onClick={() => setMobileMenuOpen(false)}>Goal Selection</Link>
-          <Link to="/trainers" className="nav-link" onClick={() => setMobileMenuOpen(false)}>Trainers</Link>
-          <Link to="/pricing" className="nav-link" onClick={() => setMobileMenuOpen(false)}>Pricing</Link>
+          <Link to="/health-info" className="nav-link" onClick={() => setMobileMenuOpen(false)}>My Health Info</Link>
           {user && <Link to="/dashboard" className="nav-link" onClick={() => setMobileMenuOpen(false)}>Dashboard</Link>}
           
           {user ? (
