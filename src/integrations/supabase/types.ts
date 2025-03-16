@@ -9,6 +9,54 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      health_info: {
+        Row: {
+          activity_level: string | null
+          age: string | null
+          allergies: string | null
+          created_at: string
+          current_health_condition: string | null
+          fitness_goals: string | null
+          height: string | null
+          id: string
+          medications: string | null
+          previous_health_conditions: string | null
+          updated_at: string
+          user_id: string
+          weight: string | null
+        }
+        Insert: {
+          activity_level?: string | null
+          age?: string | null
+          allergies?: string | null
+          created_at?: string
+          current_health_condition?: string | null
+          fitness_goals?: string | null
+          height?: string | null
+          id?: string
+          medications?: string | null
+          previous_health_conditions?: string | null
+          updated_at?: string
+          user_id: string
+          weight?: string | null
+        }
+        Update: {
+          activity_level?: string | null
+          age?: string | null
+          allergies?: string | null
+          created_at?: string
+          current_health_condition?: string | null
+          fitness_goals?: string | null
+          height?: string | null
+          id?: string
+          medications?: string | null
+          previous_health_conditions?: string | null
+          updated_at?: string
+          user_id?: string
+          weight?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string

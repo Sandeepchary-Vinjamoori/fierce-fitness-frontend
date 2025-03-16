@@ -1,3 +1,4 @@
+
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from '@/components/ui/toaster';
 import { PaymentProvider } from '@/components/PaymentProvider';
@@ -54,7 +55,14 @@ function App() {
                 </ProtectedRoute>
               } 
             />
-            <Route path="/health-info" element={<HealthInfo />} />
+            <Route 
+              path="/health-info" 
+              element={
+                <ProtectedRoute>
+                  <HealthInfo />
+                </ProtectedRoute>
+              } 
+            />
             <Route path="*" element={<NotFound />} />
           </Routes>
           <Toaster />
