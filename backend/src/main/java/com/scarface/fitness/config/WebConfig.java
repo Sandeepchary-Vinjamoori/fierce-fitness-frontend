@@ -23,12 +23,12 @@ public class WebConfig implements WebMvcConfigurer {
                 protected Resource getResource(String resourcePath, Resource location) throws IOException {
                     Resource requestedResource = location.createRelative(resourcePath);
                     
-                    // If the requested resource exists, return it
+                    // If requested resource exists, return it
                     if (requestedResource.exists() && requestedResource.isReadable()) {
                         return requestedResource;
                     }
                     
-                    // If the resource doesn't exist, return index.html for React Router to handle
+                    // If the resource doesn't exist, return index.html for SPA routing
                     return new ClassPathResource("/static/index.html");
                 }
             });

@@ -97,5 +97,3 @@ export const healthInfoApi = {
     });
   }
 };
-
-// Add other API clients as needed (checkout, dashboard, etc.)

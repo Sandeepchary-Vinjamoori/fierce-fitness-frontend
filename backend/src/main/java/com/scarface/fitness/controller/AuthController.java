@@ -28,8 +28,8 @@ public class AuthController {
     }
 
     @GetMapping("/session")
-    public ResponseEntity<String> getSession() {
+    public ResponseEntity<?> getSession() {
         // This endpoint would verify if the user's session is still valid
-        return ResponseEntity.ok("Valid session");
+        return ResponseEntity.ok().build();
     }
 }
