@@ -3,19 +3,14 @@ package com.scarface.fitness.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-import java.time.LocalDateTime;
-
+@Entity
+@Table(name = "profiles")
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
-@Table(name = "profiles")
 public class Profile {
 
     @Id
@@ -23,30 +18,20 @@ public class Profile {
 
     @Column(name = "full_name")
     private String fullName;
-
+    
     @Column(name = "phone_number")
     private String phoneNumber;
 
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
-
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
-
     @OneToOne
-    @MapsId
+    @JoinColumn(name = "user_id")
     @JsonIgnore
-    @JoinColumn(name = "id")
+    @ToString.Exclude
     private User user;
 
     @PrePersist
-    protected void onCreate() {
-        this.createdAt = LocalDateTime.now();
-        this.updatedAt = LocalDateTime.now();
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        this.updatedAt = LocalDateTime.now();
+    public void prePersist() {
+        if (user != null && user.getId() != null) {
+            this.id = user.getId();
+        }
     }
 }
